@@ -97,7 +97,8 @@
           <label>Name: </label>
           <input v-model="form.name" class="form-control mb-2" :disabled="mode === 'delete'" />
           <label>Code: </label>
-          <input v-model="form.code" class="form-control mb-2" :disabled="mode === 'delete'" />
+          <input v-model="form.code" class="form-control mb-2" :disabled="mode === 'delete'" @keyup="checkDuplicateCode"/>
+          <div v-if="errors.code" class="error-message" style="color: red;"><i class="bi bi-exclamation-triangle-fill me-2"></i>{{ errors.code }}</div>
           <label>Status: </label>
           <select v-model="form.status" class="form-select mb-2" :disabled="mode === 'delete'">
             <option value="active">Active</option>
@@ -120,7 +121,7 @@
 
 <script>
 
-  import axios from 'axios';
+import axios from 'axios';
 
 
 export default {
@@ -137,6 +138,7 @@ export default {
         status: 'active',
         description: ''
       },
+      errors: {},
       position: { x: 400, y: 120 },
       dragging: false,
       offset: { x: 0, y: 0 }
@@ -198,10 +200,26 @@ export default {
 
     close() {
       this.showForm = false
+      this.errors = {};
       this.resetForm()
+    },
+    checkDuplicateCode() {
+    this.errors.code = '';
+
+    const duplicate = this.items.find(
+      item => item.code === this.form.code && item.uuid !== this.form.uuid
+    );
+
+    if (duplicate) {
+      this.errors.code = 'The code is already present .Please check the code.';
+    }
     },
 
     save() {
+      this.errors = {};
+       this.checkDuplicateCode();
+
+        if (this.errors.code) return; // stop saving if duplicate
       const req = this.form.uuid
         ? axios.put(`/api/items/${this.form.uuid}`, this.form)
         : axios.post('/api/items', this.form)
@@ -237,8 +255,18 @@ export default {
 
     onDrag(e) {
       if (!this.dragging) return
-      this.position.x = e.clientX - this.offset.x
-      this.position.y = e.clientY - this.offset.y
+
+      let newX = e.clientX - this.offset.x
+      let newY = e.clientY - this.offset.y
+
+      const formWidth = 500; 
+      const formHeight = 400;
+
+      newX = Math.max(0, Math.min(newX, window.innerWidth - formWidth))
+      newY = Math.max(0, Math.min(newY, window.innerHeight - formHeight))
+
+      this.position.x = newX
+      this.position.y = newY
     },
 
     stopDrag() {
@@ -312,6 +340,8 @@ export default {
   width: 500px;
   z-index: 1000;
   border-radius: 20px;
+  box-sizing: border-box;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
 .cursor-move {
