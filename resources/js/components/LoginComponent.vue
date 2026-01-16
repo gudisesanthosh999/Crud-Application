@@ -5,10 +5,6 @@
     <br>
   <div class="container mt-5" style="max-width:400px">
     <br><br>
-    <br>
-    <h3 class="mb-3 text-center">Login</h3>
-    
-
     <div class="mb-3">
       <label>Email:</label>
       <input v-model="email" class="form-control" placeholder="Email">
@@ -65,7 +61,7 @@ export default {
 <style scoped>
 .container{
     background-color: rgb(127, 150, 250);
-    height: 500px;
+    height: 400px;
     border-radius: 30px;
     padding: 50px;
 }
