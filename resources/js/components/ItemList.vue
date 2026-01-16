@@ -254,7 +254,7 @@ export default {
         this.fetchItems()
         this.close()
         const action = this.form.uuid ? 'updated' : 'created';
-        this.showToast(`Record ${action} successfully!`, 'success', 1000);
+        this.showToast(`Record ${action} successfully!`, 'success', 3000);
       })
     },
 
@@ -262,7 +262,7 @@ export default {
       axios.delete(`/api/items/${this.form.uuid}`).then(() => {
         this.fetchItems()
         this.close()
-        this.showToast('Record deleted successfully!', 'success', 1000);
+        this.showToast('Record deleted successfully!', 'success', 3000);
       })
     },
 
@@ -302,7 +302,7 @@ export default {
       this.dragging = false
     },
 
-    showToast(message, type = 'success', duration = 100) {
+    showToast(message, type = 'success', duration = 1000) {
     const toast = {
       message,
       type,      
@@ -396,7 +396,7 @@ export default {
   z-index: 1000;
   border-radius: 20px;
   box-sizing: border-box;
-  
+
 }
 
 .cursor-move {
