@@ -1,5 +1,31 @@
 <template>
-
+  
+<div class="toast-container top-0 end-0 p-3" style="position: fixed; z-index: 2000;">
+  <div
+    v-for="(toast, index) in toasts"
+    :key="index"
+    class="toast show d-flex align-items-center mb-2"
+    :class="toast.type === 'success' ? 'bg-success text-white' : 'bg-danger text-white'"
+    role="alert"
+  >
+    <div class="toast-body">
+      {{ toast.message }}
+      <div class="progress mt-1" style="height: 3px;">
+        <div
+          class="progress-bar"
+          :class="toast.type === 'success' ? 'bg-light' : 'bg-warning'"
+          role="progressbar"
+          :style="{ width: toast.progress + '%' }"
+        ></div>
+      </div>
+    </div>
+    <button
+      type="button"
+      class="btn-close btn-close-white me-2 m-auto"
+      @click="removeToast(index)"
+    ></button>
+  </div>
+</div>
   <div class="heading">
     <h1>Records</h1>
     <button class=" Logoutbtn btn btn-danger mb-3" @click="logout">Logout</button>
@@ -128,6 +154,7 @@ export default {
   data() {
     return {
       items: [],
+      toasts: [],
       filter: '',
       showForm: false,
       mode: 'create',
@@ -200,8 +227,7 @@ export default {
 
     close() {
       this.showForm = false
-      this.errors = {};
-      this.resetForm()
+      this.errors = {}
     },
     checkDuplicateCode() {
     this.errors.code = '';
@@ -227,6 +253,8 @@ export default {
       req.then(() => {
         this.fetchItems()
         this.close()
+        const action = this.form.uuid ? 'updated' : 'created';
+        this.showToast(`Record ${action} successfully!`, 'success', 1000);
       })
     },
 
@@ -234,6 +262,7 @@ export default {
       axios.delete(`/api/items/${this.form.uuid}`).then(() => {
         this.fetchItems()
         this.close()
+        this.showToast('Record deleted successfully!', 'success', 1000);
       })
     },
 
@@ -271,7 +300,33 @@ export default {
 
     stopDrag() {
       this.dragging = false
-    }
+    },
+
+    showToast(message, type = 'success', duration = 100) {
+    const toast = {
+      message,
+      type,      
+      duration,  
+      progress: 100
+    };
+
+    this.toasts.push(toast);
+
+    const interval = 50; 
+    const decrement = interval / duration * 100;
+
+    const timer = setInterval(() => {
+      toast.progress -= decrement;
+      if (toast.progress <= 0) {
+        clearInterval(timer);
+        this.toasts.splice(this.toasts.indexOf(toast), 1);
+      }
+    }, interval);
+  },
+
+  removeToast(index) {
+    this.toasts.splice(index, 1);
+  }
   }
 }
 </script>
@@ -341,7 +396,7 @@ export default {
   z-index: 1000;
   border-radius: 20px;
   box-sizing: border-box;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  
 }
 
 .cursor-move {
